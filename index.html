@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#a8e6cf">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Planner">
-<title>Mint Planner ✧</title>
+<meta name="apple-mobile-web-app-title" content="Alexie's Planner">
+<title>Alexie's Planner ✧</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -66,6 +66,12 @@ header h1{font-size:22px;margin:0;flex:1;font-weight:700}
 .addrow2{display:flex;gap:8px;margin:0 16px 12px;align-items:center}
 .addrow2 input[type=time]{border:2px solid #cdeee4;border-radius:999px;padding:8px 10px;font:inherit;background:#fff;color:var(--ink);width:104px;flex:none}
 .dash{color:#c9d8d3;font-weight:700}
+.edcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
+.edcol input[type=text]{border:2px solid #cdeee4;border-radius:999px;padding:8px 12px;font:inherit;background:#fff;color:var(--ink);min-width:0}
+.edtimes{display:flex;gap:6px;align-items:center}
+.edtimes input[type=time]{border:2px solid #cdeee4;border-radius:999px;padding:6px 8px;font:inherit;background:#fff;color:var(--ink);width:96px;flex:none}
+.btn.tiny{padding:8px 12px;font-size:14px}
+.eventrow .txt{cursor:pointer}
 nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:10px 0 calc(10px + env(safe-area-inset-bottom));z-index:5}
 .tabbar{display:flex;background:#fff;border-radius:999px;box-shadow:0 10px 24px rgba(91,196,173,.28);padding:6px}
 .tabbar button{border:none;background:none;font:inherit;font-weight:700;padding:10px 22px;border-radius:999px;color:var(--muted);cursor:pointer}
@@ -76,22 +82,8 @@ section[hidden]{display:none}
 <body>
 <div class="wrap">
 <header>
-  <svg class="mascot" viewBox="0 0 64 64" width="56" height="56" aria-hidden="true">
-    <path d="M10 22 L17 6 L25 19 Z" fill="#a8e6cf"/>
-    <path d="M54 22 L47 6 L39 19 Z" fill="#a8e6cf"/>
-    <path d="M13.5 19 L17 11 L21 17 Z" fill="#ffd9e4"/>
-    <path d="M50.5 19 L47 11 L43 17 Z" fill="#ffd9e4"/>
-    <circle cx="32" cy="36" r="22" fill="#fff" stroke="#a8e6cf" stroke-width="3"/>
-    <circle cx="23" cy="33" r="4" fill="#3f5a54"/>
-    <circle cx="41" cy="33" r="4" fill="#3f5a54"/>
-    <circle cx="21.8" cy="31.6" r="1.4" fill="#fff"/>
-    <circle cx="39.8" cy="31.6" r="1.4" fill="#fff"/>
-    <ellipse cx="16" cy="41" rx="4" ry="2.6" fill="#ffc7d6" opacity=".9"/>
-    <ellipse cx="48" cy="41" rx="4" ry="2.6" fill="#ffc7d6" opacity=".9"/>
-    <path d="M30 38 h4" stroke="#3f5a54" stroke-width="2" stroke-linecap="round"/>
-    <path d="M28 43 q4 4 8 0" stroke="#3f5a54" stroke-width="2" fill="none" stroke-linecap="round"/>
-  </svg>
-  <h1><span class="spark">✧</span> Mint Planner <span class="spark">✧</span></h1>
+  <div class="mascot" style="font-size:46px;line-height:1" aria-hidden="true">🤯</div>
+  <h1><span class="spark">✧</span> Alexie's Planner <span class="spark">✧</span></h1>
 </header>
 
 <section id="view-todos">
@@ -157,6 +149,7 @@ var today=new Date();
 var cur={y:today.getFullYear(),m:today.getMonth(),sel:keyOf(today)};
 var tsel=keyOf(today);
 var curCat='per';
+var editId=null;
 var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 var DOWS=['S','M','T','W','T','F','S'];
 var WDAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -202,7 +195,14 @@ function renderDay(){
   evs.sort(function(a,b){var x=a.time||'99:99',y=b.time||'99:99';return x<y?-1:x>y?1:0});
   for(k=0;k<evs.length;k++){e=evs[k];
     var tt=e.time?(e.end?(e.time+'-'+e.end):e.time):'';
-    html+='<div class="eventrow" data-id="'+e.id+'" data-kind="ev"><span class="etime'+(e.time?'':' notime')+'">'+(e.time?esc(tt):'all day')+'</span><div class="txt">'+esc(e.text)+'</div><button class="del" data-act="del">✕</button></div>';
+    if(e.id===editId){
+      html+='<div class="eventrow editing" data-id="'+e.id+'" data-kind="ev">'+
+        '<div class="edcol"><input type="text" class="eetext" value="'+esc(e.text)+'">'+
+        '<div class="edtimes"><input type="time" class="eestart" value="'+esc(e.time||'')+'"><span class="dash">–</span><input type="time" class="eeend" value="'+esc(e.end||'')+'"></div></div>'+
+        '<button class="btn tiny" data-act="save">✓</button><button class="del" data-act="cancel">↩</button><button class="del" data-act="del">✕</button></div>';
+    } else {
+      html+='<div class="eventrow" data-id="'+e.id+'" data-kind="ev"><span class="etime'+(e.time?'':' notime')+'">'+(e.time?esc(tt):'all day')+'</span><div class="txt">'+esc(e.text)+'</div><button class="del" data-act="del">✕</button></div>';
+    }
   }
   var tks=todos.filter(function(x){return x.date===cur.sel});
   for(k=0;k<tks.length;k++){r=tks[k];
@@ -264,18 +264,33 @@ $('#cleardone').addEventListener('click',function(){
 $('#events').addEventListener('click',function(e){
   var row=e.target.closest('.eventrow'); if(!row)return;
   var id=row.getAttribute('data-id'),kind=row.getAttribute('data-kind');
-  if(e.target.closest('[data-act=toggle]')&&kind==='tsk'){
+  if(e.target.closest('[data-act=save]')){
+    var txt=row.querySelector('.eetext').value.trim(); if(!txt)return;
+    for(i=0;i<events.length;i++)if(events[i].id===id){events[i].text=txt;events[i].time=row.querySelector('.eestart').value||'';events[i].end=row.querySelector('.eeend').value||''}
+    editId=null; save(); renderCal();
+  } else if(e.target.closest('[data-act=cancel]')){
+    editId=null; renderCal();
+  } else if(e.target.closest('[data-act=toggle]')&&kind==='tsk'){
     for(i=0;i<todos.length;i++)if(todos[i].id===id)todos[i].done=!todos[i].done;
     save(); renderCal();
   } else if(e.target.closest('[data-act=del]')){
+    editId=null;
     if(kind==='ev'){events=events.filter(function(x){return x.id!==id})}
     else{todos=todos.filter(function(x){return x.id!==id})}
     save(); renderCal();
+  } else if(kind==='ev'){
+    editId=id; renderCal();
+  }
+});
+$('#events').addEventListener('keydown',function(e){
+  var row=e.target.closest('.eventrow'); if(!row)return;
+  if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('eetext')){
+    var b=row.querySelector('[data-act=save]'); if(b)b.click();
   }
 });
 $('#grid').addEventListener('click',function(e){
   var c=e.target.closest('.day'); if(!c||!c.getAttribute('data-key'))return;
-  cur.sel=c.getAttribute('data-key'); renderCal();
+  cur.sel=c.getAttribute('data-key'); editId=null; renderCal();
 });
 $('#mprev').addEventListener('click',function(){cur.m--;if(cur.m<0){cur.m=11;cur.y--}renderCal()});
 $('#mnext').addEventListener('click',function(){cur.m++;if(cur.m>11){cur.m=0;cur.y++}renderCal()});
