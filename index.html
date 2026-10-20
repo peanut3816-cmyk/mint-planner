@@ -61,8 +61,11 @@ header h1{font-size:22px;margin:0;flex:1;font-weight:700}
 .day .dot{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:999px;background:var(--mint)}
 .day.sel .dot{background:#fff}
 .daylabel{margin:14px 16px 4px;font-weight:700}
-.etime{background:var(--mint);color:#fff;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;flex:none;min-width:56px;text-align:center}
+.etime{background:var(--mint);color:#fff;border-radius:999px;padding:4px 8px;font-size:12px;font-weight:700;flex:none;white-space:nowrap}
 .etime.notime{background:#cdeee4;color:#5b8a7d}
+.addrow2{display:flex;gap:8px;margin:0 16px 12px;align-items:center}
+.addrow2 input[type=time]{border:2px solid #cdeee4;border-radius:999px;padding:8px 10px;font:inherit;background:#fff;color:var(--ink);width:104px;flex:none}
+.dash{color:#c9d8d3;font-weight:700}
 nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:10px 0 calc(10px + env(safe-area-inset-bottom));z-index:5}
 .tabbar{display:flex;background:#fff;border-radius:999px;box-shadow:0 10px 24px rgba(91,196,173,.28);padding:6px}
 .tabbar button{border:none;background:none;font:inherit;font-weight:700;padding:10px 22px;border-radius:999px;color:var(--muted);cursor:pointer}
@@ -120,9 +123,13 @@ section[hidden]{display:none}
   <div class="grid" id="grid"></div>
   <div class="daylabel" id="daylabel"></div>
   <div id="events"></div>
-  <div class="addrow">
-    <input type="text" id="einput" placeholder="add an event ♡" autocomplete="off">
+  <div class="addrow" style="margin-bottom:8px">
+    <input type="text" id="einput" placeholder="what's happening ♡" autocomplete="off">
+  </div>
+  <div class="addrow2">
     <input type="time" id="etimeinput">
+    <span class="dash">–</span>
+    <input type="time" id="eend">
     <button class="btn pink" id="eadd">＋</button>
   </div>
 </section>
@@ -194,7 +201,8 @@ function renderDay(){
   var evs=events.filter(function(x){return x.date===cur.sel});
   evs.sort(function(a,b){var x=a.time||'99:99',y=b.time||'99:99';return x<y?-1:x>y?1:0});
   for(k=0;k<evs.length;k++){e=evs[k];
-    html+='<div class="eventrow" data-id="'+e.id+'" data-kind="ev"><span class="etime'+(e.time?'':' notime')+'">'+(e.time?esc(e.time):'all day')+'</span><div class="txt">'+esc(e.text)+'</div><button class="del" data-act="del">✕</button></div>';
+    var tt=e.time?(e.end?(e.time+'-'+e.end):e.time):'';
+    html+='<div class="eventrow" data-id="'+e.id+'" data-kind="ev"><span class="etime'+(e.time?'':' notime')+'">'+(e.time?esc(tt):'all day')+'</span><div class="txt">'+esc(e.text)+'</div><button class="del" data-act="del">✕</button></div>';
   }
   var tks=todos.filter(function(x){return x.date===cur.sel});
   for(k=0;k<tks.length;k++){r=tks[k];
@@ -230,8 +238,8 @@ function addTodo(){
 }
 function addEvent(){
   var v=$('#einput').value.trim(); if(!v)return;
-  events.push({id:Date.now()+''+Math.floor(Math.random()*999),date:cur.sel,text:v,time:$('#etimeinput').value||''});
-  $('#einput').value=''; $('#etimeinput').value=''; save(); renderCal();
+  events.push({id:Date.now()+''+Math.floor(Math.random()*999),date:cur.sel,text:v,time:$('#etimeinput').value||'',end:$('#eend').value||''});
+  $('#einput').value=''; $('#etimeinput').value=''; $('#eend').value=''; save(); renderCal();
 }
 $('#tadd').addEventListener('click',addTodo);
 $('#tinput').addEventListener('keydown',function(e){if(e.key==='Enter')addTodo()});
