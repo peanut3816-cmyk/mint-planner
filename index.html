@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#a8e6cf">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Planner">
+<title>Mint Planner ♡</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box}
+:root{--mint:#5bc4ad;--mint-light:#a8e6cf;--pink:#ff9eb5;--ink:#3f5a54;--muted:#8fa8a1}
+html,body{margin:0}
+body{font-family:'Quicksand',ui-rounded,system-ui,-apple-system,sans-serif;background:linear-gradient(165deg,#eafff8 0%,#d9f6ec 55%,#ffeef3 100%);min-height:100vh;color:var(--ink);-webkit-tap-highlight-color:transparent;padding-bottom:96px;font-size:16px}
+.bg-deco span{position:fixed;font-size:26px;opacity:.35;animation:float 9s ease-in-out infinite;pointer-events:none;z-index:0}
+.bg-deco span:nth-child(1){top:8%;left:6%;animation-delay:0s}
+.bg-deco span:nth-child(2){top:22%;right:8%;animation-delay:1.6s}
+.bg-deco span:nth-child(3){top:48%;left:4%;animation-delay:3.1s}
+.bg-deco span:nth-child(4){top:64%;right:5%;animation-delay:4.4s}
+.bg-deco span:nth-child(5){top:84%;left:12%;animation-delay:5.8s}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
+.wrap{max-width:480px;margin:0 auto;position:relative;z-index:1}
+header{display:flex;align-items:center;gap:10px;padding:22px 20px 4px}
+header h1{font-size:22px;margin:0;flex:1;font-weight:700}
+.mascot{animation:bounce 3.2s ease-in-out infinite;flex:none}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+.card{background:rgba(255,255,255,.92);border-radius:24px;padding:16px;box-shadow:0 10px 24px rgba(91,196,173,.16);margin:12px 16px;border:2px solid #fff}
+.pbar{height:10px;background:#e6f7f1;border-radius:999px;overflow:hidden;margin-top:10px}
+.pfill{height:100%;width:0;background:linear-gradient(90deg,var(--mint),var(--pink));border-radius:999px;transition:width .35s}
+.addrow{display:flex;gap:8px;margin:12px 16px}
+.addrow input[type=text]{flex:1;min-width:0;border:2px solid #cdeee4;border-radius:999px;padding:12px 16px;font:inherit;background:#fff;color:var(--ink)}
+.addrow input:focus{outline:none;border-color:var(--mint)}
+.addrow input[type=time]{border:2px solid #cdeee4;border-radius:999px;padding:8px 10px;font:inherit;background:#fff;color:var(--ink);width:112px}
+.btn{border:none;border-radius:999px;padding:12px 18px;font:inherit;font-weight:700;cursor:pointer;color:#fff;background:var(--mint);flex:none}
+.btn:active{transform:scale(.96)}
+.btn.pink{background:var(--pink)}
+#list,#events{margin:0 16px;display:flex;flex-direction:column;gap:8px}
+.todo,.eventrow{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.92);border:2px solid #eafaf4;border-radius:18px;padding:10px 12px;box-shadow:0 4px 10px rgba(91,196,173,.1)}
+.todo.done{background:#f4fbf8;border-color:#d8f3e9}
+.todo.done .txt{color:#a9bfb9;text-decoration:line-through}
+.check{width:26px;height:26px;border-radius:999px;border:2px solid var(--mint);background:#fff;flex:none;display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px}
+.todo.done .check{background:var(--pink);border-color:var(--pink)}
+.txt{flex:1;font-weight:600;word-break:break-word}
+.del{border:none;background:none;color:#c9d8d3;font-size:18px;padding:4px 6px;cursor:pointer;flex:none}
+.small{margin:10px 16px;color:var(--muted);background:none;border:none;font:inherit;font-size:13px;text-decoration:underline;cursor:pointer}
+.empty{text-align:center;color:#9db8b0;padding:24px 10px;font-weight:600}
+.empty b{display:block;font-size:34px;margin-bottom:6px}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin:12px 16px 2px}
+.calhead h2{font-size:18px;margin:0;font-weight:700}
+.navbtn{width:38px;height:38px;border-radius:999px;border:none;background:#fff;box-shadow:0 4px 10px rgba(91,196,173,.18);font-size:16px;color:var(--mint);font-weight:700;cursor:pointer}
+.grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin:10px 16px}
+.dow{text-align:center;font-size:11px;color:var(--muted);font-weight:700;padding:4px 0}
+.day{position:relative;height:40px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:600;background:rgba(255,255,255,.85);border:2px solid transparent;cursor:pointer}
+.day.blank{background:none;border:none;cursor:default}
+.day.today{border-color:var(--mint)}
+.day.sel{background:var(--pink);color:#fff;border-color:var(--pink)}
+.day .dot{position:absolute;bottom:5px;left:50%;transform:translateX(-50%);width:5px;height:5px;border-radius:999px;background:var(--mint)}
+.day.sel .dot{background:#fff}
+.daylabel{margin:14px 16px 4px;font-weight:700}
+.etime{background:var(--mint);color:#fff;border-radius:999px;padding:4px 10px;font-size:12px;font-weight:700;flex:none;min-width:56px;text-align:center}
+.etime.notime{background:#cdeee4;color:#5b8a7d}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:center;padding:10px 0 calc(10px + env(safe-area-inset-bottom));z-index:5}
+.tabbar{display:flex;background:#fff;border-radius:999px;box-shadow:0 10px 24px rgba(91,196,173,.28);padding:6px}
+.tabbar button{border:none;background:none;font:inherit;font-weight:700;padding:10px 22px;border-radius:999px;color:var(--muted);cursor:pointer}
+.tabbar button.on{background:var(--mint);color:#fff}
+section[hidden]{display:none}
+</style>
+</head>
+<body>
+<div class="bg-deco"><span>✿</span><span>♡</span><span>☆</span><span>✿</span><span>♡</span></div>
+<div class="wrap">
+<header>
+  <svg class="mascot" viewBox="0 0 48 48" width="44" height="44" aria-hidden="true">
+    <path d="M8 16 L14 4 L20 14 Z" fill="#a8e6cf"/>
+    <path d="M40 16 L34 4 L28 14 Z" fill="#a8e6cf"/>
+    <circle cx="24" cy="26" r="18" fill="#fff" stroke="#a8e6cf" stroke-width="3"/>
+    <circle cx="17" cy="24" r="2.4" fill="#3f5a54"/>
+    <circle cx="31" cy="24" r="2.4" fill="#3f5a54"/>
+    <path d="M21 30 q3 3 6 0" stroke="#3f5a54" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <ellipse cx="11" cy="30" rx="3.4" ry="2.2" fill="#ffc7d6" opacity=".85"/>
+    <ellipse cx="37" cy="30" rx="3.4" ry="2.2" fill="#ffc7d6" opacity=".85"/>
+    <path d="M22 27 h4" stroke="#3f5a54" stroke-width="2" stroke-linecap="round"/>
+  </svg>
+  <h1 id="title">Mint Planner ♡</h1>
+</header>
+
+<section id="view-todos">
+  <div class="card">
+    <div id="ptext" style="font-weight:700"></div>
+    <div class="pbar"><div class="pfill" id="pfill"></div></div>
+  </div>
+  <div class="addrow">
+    <input type="text" id="tinput" placeholder="add a task ♡" autocomplete="off">
+    <button class="btn" id="tadd">＋</button>
+  </div>
+  <div id="list"></div>
+  <button class="small" id="cleardone" hidden>clear finished tasks</button>
+</section>
+
+<section id="view-cal" hidden>
+  <div class="calhead">
+    <button class="navbtn" id="mprev">‹</button>
+    <h2 id="mlabel"></h2>
+    <button class="navbtn" id="mnext">›</button>
+  </div>
+  <div class="grid" id="grid"></div>
+  <div class="daylabel" id="daylabel"></div>
+  <div id="events"></div>
+  <div class="addrow">
+    <input type="text" id="einput" placeholder="add an event ♡" autocomplete="off">
+    <input type="time" id="etimeinput">
+    <button class="btn pink" id="eadd">＋</button>
+  </div>
+</section>
+</div>
+
+<nav><div class="tabbar">
+  <button id="tab-todos" class="on">✓ To-dos</button>
+  <button id="tab-cal">♡ Calendar</button>
+</div></nav>
+
+<script>
+var $=function(s){return document.querySelector(s)};
+var KEY_T='mint_planner_todos',KEY_E='mint_planner_events';
+var todos=[],events=[];
+try{todos=JSON.parse(localStorage.getItem(KEY_T)||'[]')||[]}catch(e){todos=[]}
+try{events=JSON.parse(localStorage.getItem(KEY_E)||'[]')||[]}catch(e){events=[]}
+if(!Array.isArray(todos))todos=[]; if(!Array.isArray(events))events=[];
+function save(){localStorage.setItem(KEY_T,JSON.stringify(todos));localStorage.setItem(KEY_E,JSON.stringify(events))}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;')}
+function pad(n){return String(n).padStart(2,'0')}
+function keyOf(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
+var today=new Date();
+var cur={y:today.getFullYear(),m:today.getMonth(),sel:keyOf(today)};
+var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+var DOWS=['S','M','T','W','T','F','S'];
+var WDAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function renderProgress(){
+  var n=todos.length,done=todos.filter(function(t){return t.done}).length;
+  $('#ptext').textContent=n?('☆ '+done+' of '+n+' done ♡'):'your cute little list ♡';
+  $('#pfill').style.width=n?Math.round(100*done/n)+'%':'0%';
+}
+function renderTodos(){
+  var el=$('#list'),html='',i,t;
+  for(i=0;i<todos.length;i++){t=todos[i];
+    html+='<div class="todo'+(t.done?' done':'')+'" data-id="'+t.id+'">'+
+      '<div class="check" data-act="toggle">'+(t.done?'♥':'')+'</div>'+
+      '<div class="txt">'+esc(t.text)+'</div>'+
+      '<button class="del" data-act="del">✕</button></div>';
+  }
+  el.innerHTML=html||'<div class="empty"><b>🍓</b>all clear! time for a treat ♡</div>';
+  $('#cleardone').hidden=!todos.some(function(t){return t.done});
+  renderProgress();
+}
+function renderEvents(){
+  var el=$('#events'),rows=events.filter(function(e){return e.date===cur.sel});
+  rows.sort(function(a,b){var x=a.time||'99:99',y=b.time||'99:99';return x<y?-1:x>y?1:0});
+  var html='',i,e;
+  for(i=0;i<rows.length;i++){e=rows[i];
+    html+='<div class="eventrow" data-id="'+e.id+'"><span class="etime'+(e.time?'':' notime')+'">'+(e.time?esc(e.time):'all day')+'</span><div class="txt">'+esc(e.text)+'</div><button class="del" data-act="delev">✕</button></div>';
+  }
+  el.innerHTML=html||'<div class="empty"><b>🌷</b>nothing planned, add something cute ♡</div>';
+}
+function renderCal(){
+  $('#mlabel').textContent=MONTHS[cur.m]+' '+cur.y;
+  var first=new Date(cur.y,cur.m,1).getDay();
+  var days=new Date(cur.y,cur.m+1,0).getDate();
+  var html='',d,i,k,cls;
+  for(i=0;i<7;i++)html+='<div class="dow">'+DOWS[i]+'</div>';
+  for(i=0;i<first;i++)html+='<div class="day blank"></div>';
+  for(d=1;d<=days;d++){
+    k=cur.y+'-'+pad(cur.m+1)+'-'+pad(d);
+    cls='day';
+    if(k===keyOf(today))cls+=' today';
+    if(k===cur.sel)cls+=' sel';
+    if(events.some(function(e){return e.date===k}))cls+=' hasdot';
+    html+='<div class="'+cls+'" data-key="'+k+'">'+d+(cls.indexOf('hasdot')>-1?'<span class="dot"></span>':'')+'</div>';
+  }
+  $('#grid').innerHTML=html;
+  var p=new Date(cur.y,parseInt(cur.sel.split('-')[1],10)-1,parseInt(cur.sel.split('-')[2],10));
+  $('#daylabel').textContent=WDAYS[p.getDay()]+' '+p.getDate()+' '+MONTHS[p.getMonth()].slice(0,3)+' ♡';
+  renderEvents();
+}
+function renderAll(){renderTodos();renderCal()}
+
+function addTodo(){
+  var v=$('#tinput').value.trim(); if(!v)return;
+  todos.push({id:Date.now()+''+Math.floor(Math.random()*999),text:v,done:false});
+  $('#tinput').value=''; save(); renderTodos();
+}
+function addEvent(){
+  var v=$('#einput').value.trim(); if(!v)return;
+  events.push({id:Date.now()+''+Math.floor(Math.random()*999),date:cur.sel,text:v,time:$('#etimeinput').value||''});
+  $('#einput').value=''; $('#etimeinput').value=''; save(); renderCal();
+}
+$('#tadd').addEventListener('click',addTodo);
+$('#tinput').addEventListener('keydown',function(e){if(e.key==='Enter')addTodo()});
+$('#eadd').addEventListener('click',addEvent);
+$('#einput').addEventListener('keydown',function(e){if(e.key==='Enter')addEvent()});
+$('#list').addEventListener('click',function(e){
+  var row=e.target.closest('.todo'); if(!row)return;
+  var id=row.getAttribute('data-id'),i;
+  if(e.target.closest('[data-act=toggle]')){
+    for(i=0;i<todos.length;i++)if(todos[i].id===id)todos[i].done=!todos[i].done;
+    save(); renderTodos();
+  } else if(e.target.closest('[data-act=del]')){
+    todos=todos.filter(function(t){return t.id!==id}); save(); renderTodos();
+  }
+});
+$('#cleardone').addEventListener('click',function(){todos=todos.filter(function(t){return !t.done});save();renderTodos()});
+$('#events').addEventListener('click',function(e){
+  var row=e.target.closest('.eventrow'); if(!row)return;
+  if(e.target.closest('[data-act=delev]')){
+    var id=row.getAttribute('data-id');
+    events=events.filter(function(x){return x.id!==id}); save(); renderCal();
+  }
+});
+$('#grid').addEventListener('click',function(e){
+  var c=e.target.closest('.day'); if(!c||!c.getAttribute('data-key'))return;
+  cur.sel=c.getAttribute('data-key'); renderCal();
+});
+$('#mprev').addEventListener('click',function(){cur.m--;if(cur.m<0){cur.m=11;cur.y--}renderCal()});
+$('#mnext').addEventListener('click',function(){cur.m++;if(cur.m>11){cur.m=0;cur.y++}renderCal()});
+function switchTab(t){
+  $('#view-todos').hidden=(t!=='todos');
+  $('#view-cal').hidden=(t!=='cal');
+  $('#tab-todos').className=(t==='todos'?'on':'');
+  $('#tab-cal').className=(t==='cal'?'on':'');
+}
+$('#tab-todos').addEventListener('click',function(){switchTab('todos')});
+$('#tab-cal').addEventListener('click',function(){switchTab('cal')});
+renderAll();
+</script>
+</body>
+</html>
