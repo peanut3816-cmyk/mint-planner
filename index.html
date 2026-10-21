@@ -68,7 +68,8 @@ header h1{font-size:22px;margin:0;flex:1;font-weight:700}
 .addrow2 input[type=time]{border:2px solid #cdeee4;border-radius:999px;padding:8px 10px;font:inherit;background:#fff;color:var(--ink);width:104px;flex:none}
 .dash{color:#c9d8d3;font-weight:700}
 .edcol{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px}
-.edcol input[type=text]{border:2px solid #cdeee4;border-radius:999px;padding:8px 12px;font:inherit;background:#fff;color:var(--ink);min-width:0}
+.edcol input[type=text],.edcol select{border:2px solid #cdeee4;border-radius:999px;padding:8px 12px;font:inherit;background:#fff;color:var(--ink);min-width:0}
+.todo.editing,.eventrow.editing{border-color:#bfe8db}
 .edtimes{display:flex;gap:6px;align-items:center}
 .edtimes input[type=time]{border:2px solid #cdeee4;border-radius:999px;padding:6px 8px;font:inherit;background:#fff;color:var(--ink);width:96px;flex:none}
 .btn.tiny{padding:8px 12px;font-size:14px}
@@ -151,6 +152,7 @@ var cur={y:today.getFullYear(),m:today.getMonth(),sel:keyOf(today)};
 var tsel=keyOf(today);
 var curCat='per';
 var editId=null;
+var editTid=null;
 var MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
 var DOWS=['S','M','T','W','T','F','S'];
 var WDAYS=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
@@ -175,11 +177,25 @@ function renderProgress(){
   $('#ptext').textContent=n?('☆ '+done+' of '+n+' done ♡'):'your cute little list ♡';
   $('#pfill').style.width=n?Math.round(100*done/n)+'%':'0%';
 }
+function catOptions(cat){
+  var h='';
+  for(var k in CATS){h+='<option value="'+k+'"'+(cat===k?' selected':'')+'>'+CATS[k].label+'</option>'}
+  return h;
+}
+function taskEditRow(t){
+  return '<div class="todo editing" data-id="'+t.id+'">'+
+    '<div class="check" data-act="toggle">'+(t.done?'♥':'')+'</div>'+
+    '<div class="edcol"><input type="text" class="eetext" value="'+esc(t.text)+'">'+
+    '<select class="eecat">'+catOptions(t.cat)+'</select></div>'+
+    '<button class="btn tiny" data-act="save">✓</button><button class="del" data-act="cancel">↩</button>'+
+    '</div>';
+}
 function renderTodos(){
   $('#todolabel').textContent=fmtLabel(tsel)+' ♡';
   $('#gotoday').hidden=(tsel===keyOf(today));
   var el=$('#list'),html='',rows=todos.filter(function(x){return x.date===tsel});
   for(i=0;i<rows.length;i++){t=rows[i];
+    if(t.id===editTid){html+=taskEditRow(t);continue}
     html+='<div class="todo'+(t.done?' done':'')+'" data-id="'+t.id+'">'+
       '<div class="check" data-act="toggle">'+(t.done?'♥':'')+'</div>'+
       '<span class="tag" style="background:'+CATS[t.cat].color+'">'+CATS[t.cat].label+'</span>'+
@@ -207,6 +223,7 @@ function renderDay(){
   }
   var tks=todos.filter(function(x){return x.date===cur.sel});
   for(k=0;k<tks.length;k++){r=tks[k];
+    if(r.id===editTid){html+=taskEditRow(r).replace('class="todo editing"','class="eventrow editing" data-kind="tsk"');continue}
     html+='<div class="eventrow'+(r.done?' done':'')+'" data-id="'+r.id+'" data-kind="tsk"><div class="check" data-act="toggle">'+(r.done?'♥':'')+'</div><span class="tag" style="background:'+CATS[r.cat].color+'">'+CATS[r.cat].label+'</span><div class="txt">'+esc(r.text)+'</div><button class="del" data-act="del">✕</button></div>';
   }
   el.innerHTML=html||'<div class="empty"><b>🌷</b>nothing planned, add something cute ♡</div>';
@@ -256,8 +273,17 @@ $('#list').addEventListener('click',function(e){
   if(e.target.closest('[data-act=toggle]')){
     for(i=0;i<todos.length;i++)if(todos[i].id===id)todos[i].done=!todos[i].done;
     save(); renderTodos();
+  } else if(e.target.closest('[data-act=save]')){
+    var txt=row.querySelector('.eetext').value.trim(); if(!txt)return;
+    var nc=row.querySelector('.eecat').value;
+    for(i=0;i<todos.length;i++)if(todos[i].id===id){todos[i].text=txt;todos[i].cat=nc}
+    editTid=null; save(); renderTodos();
+  } else if(e.target.closest('[data-act=cancel]')){
+    editTid=null; renderTodos();
   } else if(e.target.closest('[data-act=del]')){
-    todos=todos.filter(function(x){return x.id!==id}); save(); renderTodos();
+    editTid=null; todos=todos.filter(function(x){return x.id!==id}); save(); renderTodos();
+  } else if(e.target.closest('.txt')){
+    editTid=id; renderTodos();
   }
 });
 $('#cleardone').addEventListener('click',function(){
@@ -267,20 +293,30 @@ $('#events').addEventListener('click',function(e){
   var id=row.getAttribute('data-id'),kind=row.getAttribute('data-kind');
   if(e.target.closest('[data-act=save]')){
     var txt=row.querySelector('.eetext').value.trim(); if(!txt)return;
-    for(i=0;i<events.length;i++)if(events[i].id===id){events[i].text=txt;events[i].time=row.querySelector('.eestart').value||'';events[i].end=row.querySelector('.eeend').value||''}
-    editId=null; save(); renderCal();
+    if(kind==='ev'){
+      for(i=0;i<events.length;i++)if(events[i].id===id){events[i].text=txt;events[i].time=row.querySelector('.eestart').value||'';events[i].end=row.querySelector('.eeend').value||''}
+      editId=null;
+    } else {
+      var nc=row.querySelector('.eecat').value;
+      for(i=0;i<todos.length;i++)if(todos[i].id===id){todos[i].text=txt;todos[i].cat=nc}
+      editTid=null;
+    }
+    save(); renderCal();
   } else if(e.target.closest('[data-act=cancel]')){
-    editId=null; renderCal();
+    if(kind==='tsk')editTid=null; else editId=null;
+    renderCal();
   } else if(e.target.closest('[data-act=toggle]')&&kind==='tsk'){
     for(i=0;i<todos.length;i++)if(todos[i].id===id)todos[i].done=!todos[i].done;
     save(); renderCal();
   } else if(e.target.closest('[data-act=del]')){
-    editId=null;
+    editId=null; editTid=null;
     if(kind==='ev'){events=events.filter(function(x){return x.id!==id})}
     else{todos=todos.filter(function(x){return x.id!==id})}
     save(); renderCal();
   } else if(kind==='ev'){
     editId=id; renderCal();
+  } else if(kind==='tsk'&&e.target.closest('.txt')){
+    editTid=id; renderCal();
   }
 });
 $('#events').addEventListener('keydown',function(e){
@@ -291,7 +327,7 @@ $('#events').addEventListener('keydown',function(e){
 });
 $('#grid').addEventListener('click',function(e){
   var c=e.target.closest('.day'); if(!c||!c.getAttribute('data-key'))return;
-  cur.sel=c.getAttribute('data-key'); editId=null; renderCal();
+  cur.sel=c.getAttribute('data-key'); editId=null; editTid=null; renderCal();
 });
 $('#mprev').addEventListener('click',function(){cur.m--;if(cur.m<0){cur.m=11;cur.y--}renderCal()});
 $('#mnext').addEventListener('click',function(){cur.m++;if(cur.m>11){cur.m=0;cur.y++}renderCal()});
